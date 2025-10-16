@@ -1,0 +1,64 @@
+blueprint:
+  name: Persistant Notification
+  description: Send a notification with conditional message based on entity state
+  domain: automation
+  input:
+    notification_action:
+      name: Notification Action
+      description: The notify service to call (e.g., notify.mobile_app_phone)
+      selector:
+        action:
+          filter:
+            - domain: notify
+    notification_tag:
+      name: Notification Tag
+      description: Tag for the notification (used to update or clear it)
+      default: "notification"
+      selector:
+        text:
+    notification_message:
+      name: Notification Message
+      description: The message to send when condition is met
+      default: "Notification message"
+      selector:
+        text:
+          multiline: true
+    monitored_entity:
+      name: Entity to Monitor
+      description: The entity whose state will be checked
+      selector:
+        entity:
+    entity_state:
+      name: Entity State
+      description: The state to compare against (default is 'on')
+      default: "on"
+      selector:
+        text:
+    notification_ttl:
+      name: TTL (Time To Live)
+      description: Time in seconds before notification expires (0 = no expiration)
+      default: 0
+      selector:
+        number:
+          min: 0
+          max: 86400
+          unit_of_measurement: "seconds"
+
+action:
+  - action: !input notification_action
+    data:
+      message: >
+        {% if not is_state(notification_entity, notification_state) %}
+          {{ notification_msg }}
+        {% else %}
+          clear_notification
+        {% endif %}
+      data:
+        tag: !input notification_tag
+        ttl: !input notification_ttl
+        persistent: true
+
+variables:
+  notification_entity: !input monitored_entity
+  notification_state: !input entity_state
+  notification_msg: !input notification_message
