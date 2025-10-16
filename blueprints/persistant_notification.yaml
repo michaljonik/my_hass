@@ -1,5 +1,5 @@
 blueprint:
-  name: Persistant Notification
+  name: Conditional Notification
   description: Send a notification with conditional message based on entity state
   domain: automation
   input:
@@ -7,9 +7,7 @@ blueprint:
       name: Notification Action
       description: The notify service to call (e.g., notify.mobile_app_phone)
       selector:
-        action:
-          filter:
-            - domain: notify
+        action: {}
     notification_tag:
       name: Notification Tag
       description: Tag for the notification (used to update or clear it)
