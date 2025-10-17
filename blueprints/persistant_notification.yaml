@@ -52,7 +52,10 @@ action:
         {% else %}
           clear_notification
         {% endif %}
-  - data:
+  - alias: "Run action"
+    choose: []
+    default: !input notification_action
+    data:
       message: "{{ final_message }}"
       data:
         tag: !input notification_tag
