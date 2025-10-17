@@ -43,18 +43,22 @@ blueprint:
           unit_of_measurement: "seconds"
 
 action:
-  - action: !input notification_action
-    data:
-      message: >
+  - choose: []
+    default: !input notification_action
+  - variables:
+      final_message: >
         {% if not is_state(notification_entity, notification_state) %}
           {{ notification_msg }}
         {% else %}
           clear_notification
         {% endif %}
+  - data:
+      message: "{{ final_message }}"
       data:
         tag: !input notification_tag
         ttl: !input notification_ttl
         persistent: true
+    action: !input notification_action
 
 variables:
   notification_entity: !input monitored_entity
