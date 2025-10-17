@@ -58,7 +58,6 @@ action:
         tag: !input notification_tag
         ttl: !input notification_ttl
         persistent: true
-    action: !input notification_action
 
 variables:
   notification_entity: !input monitored_entity
