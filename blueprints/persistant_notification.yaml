@@ -4,10 +4,10 @@ blueprint:
   domain: automation
   input:
     notification_action:
-      name: Notification Action
-      description: The notify service to call (e.g., notify.mobile_app_phone)
+      name: Notification Services
+      description: Comma-separated list of The notify services to call (e.g., notify.mobile_app_phone1, notify.other_notify)
       selector:
-        action: {}
+        text:
     notification_tag:
       name: Notification Tag
       description: Tag for the notification (used to update or clear it)
@@ -42,27 +42,29 @@ blueprint:
           max: 86400
           unit_of_measurement: "seconds"
 
-action:
-  - choose: []
-    default: !input notification_action
-  - variables:
-      final_message: >
-        {% if not is_state(notification_entity, notification_state) %}
-          {{ notification_msg }}
-        {% else %}
-          clear_notification
-        {% endif %}
-  - alias: "Run action"
-    choose: []
-    default: !input notification_action
-    data:
-      message: "{{ final_message }}"
-      data:
-        tag: !input notification_tag
-        ttl: !input notification_ttl
-        persistent: true
+trigger:
+  - platform: state
+    entity_id: !input monitored_entity
 
 variables:
   notification_entity: !input monitored_entity
   notification_state: !input entity_state
   notification_msg: !input notification_message
+  notification_services: !input notification_action
+
+action:
+  - repeat:
+      for_each: "{{ notification_services.replace(' ', '').split(',') }}"
+      sequence:
+        - action: "{{ repeat.item }}"
+          data:
+            message: >
+              {% if is_state(notification_entity, notification_state) %}
+                {{ notification_msg }}
+              {% else %}
+                clear_notification
+              {% endif %}
+            data:
+              tag: !input notification_tag
+              ttl: !input notification_ttl
+              persistent: true
